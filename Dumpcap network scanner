@@ -1,1 +1,26 @@
+import subprocess
+
+def get_interfaces():
+    """This function displays dumpcap's network interface options"""
+    result = subprocess.run(["dumpcap", "-D"], capture_output=True)
+    interfaces = result.stdout.decode().strip().split("\n")
+    for i, interface in enumerate(interfaces):
+        print(f"{i}. {interface}")
+
+# Get user input for network interface name
+get_interfaces()
+interface_number = input("Enter the number of the network interface you want to use: ")
+interface = subprocess.run(["dumpcap", "-D"], capture_output=True).stdout.decode().strip().split("\n")[int(interface_number)].split(' ')[0]
+
+# Get user input for autostop duration
+duration = input("Enter the autostop duration (in seconds): ")
+
+# Get user input for buffer filesize
+filesize = input("Enter the buffer filesize (in MB): ")
+
+# Get user input for output filename
+output_filename = input("Enter the output filename: ")
+
+# Run dumpcap command
+subprocess.run(["dumpcap", "-i", interface, "-a", "duration:"+duration, "-b", "filesize:"+filesize+"MB", "-w", output_filename])
 
