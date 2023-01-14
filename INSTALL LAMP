@@ -1,0 +1,32 @@
+import subprocess
+
+def check_install_lamp():
+    # Check if Apache is installed
+    apache_installed = subprocess.run(["which", "httpd"], capture_output=True)
+    if apache_installed.returncode != 0:
+        print("Apache not found, installing...")
+        subprocess.run(["sudo", "apt-get", "install", "-y", "apache2"])
+    else:
+        print("Apache already installed.")
+
+    # Check if MySQL is installed
+    mysql_installed = subprocess.run(["which", "mysql"], capture_output=True)
+    if mysql_installed.returncode != 0:
+        print("MySQL not found, installing...")
+        subprocess.run(["sudo", "apt-get", "install", "-y", "mysql-server"])
+    else:
+        print("MySQL already installed.")
+
+    # Check if PHP is installed
+    php_installed = subprocess.run(["which", "php"], capture_output=True)
+    if php_installed.returncode != 0:
+        print("PHP not found, installing...")
+        subprocess.run(["sudo", "apt-get", "install", "-y", "php"])
+    else:
+        print("PHP already installed.")
+
+    # Start Apache and MySQL services
+    subprocess.run(["sudo", "systemctl", "start", "apache2"])
+    subprocess.run(["sudo", "systemctl", "start", "mysql"])
+
+check_install_lamp()
