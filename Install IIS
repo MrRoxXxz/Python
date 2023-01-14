@@ -1,0 +1,17 @@
+import subprocess
+
+def check_install_iis():
+    # Check if IIS is installed
+    iis_installed = subprocess.run(["sc", "query", "w3svc"], capture_output=True)
+    if iis_installed.returncode != 0:
+        print("IIS is not installed, installing...")
+        # Download the IIS installer
+        subprocess.run(["powershell", "-Command", "Invoke-WebRequest -Uri https://download.microsoft.com/download/6/A/A/6AA4EDFF-645B-48C5-81CC-ED5963AEAD48/WebDeploy_x64_en-us.msi -OutFile C:\iis_installer.msi"])
+        # Install IIS
+        subprocess.run(["msiexec", "/qn", "/i", "C:\iis_installer.msi"])
+        # Enable IIS
+        subprocess.run(["powershell", "-Command", "Enable-WindowsOptionalFeature -Online -FeatureName IIS-WebServerRole"])
+    else:
+        print("IIS is already installed and enabled.")
+
+check_install_iis()
