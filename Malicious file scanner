@@ -1,0 +1,38 @@
+import os
+import hashlib
+
+# List of known malicious hashes
+malicious_hashes = ["b10a8db164e0754105b7a99be72e3fe5", "d41d8cd98f00b204e9800998ecf8427e"]
+
+# Function to calculate the hash of a file
+def hash_file(filename):
+    """This function returns the SHA-1, SHA-256, and MD5 hash
+    of the file passed into it"""
+
+    # Initialize hash objects
+    sha1 = hashlib.sha1()
+    sha256 = hashlib.sha256()
+    md5 = hashlib.md5()
+
+    # Open file for reading in binary mode
+    with open(filename,'rb') as file:
+
+        # Loop till the end of the file
+        chunk = 0
+        while chunk != b'':
+            # Read only 1024 bytes at a time
+            chunk = file.read(1024)
+            sha1.update(chunk)
+            sha256.update(chunk)
+            md5.update(chunk)
+
+    # Return the hex representation of the digests
+    return sha1.hexdigest(), sha256.hexdigest(), md5.hexdigest()
+
+# Iterate through every folder and directory on the device
+for root, dirs, files in os.walk("/"):
+    for file in files:
+        file_path = os.path.join(root, file)
+        sha1, sha256, md5 = hash_file(file_path)
+        if sha1 in malicious_hashes or sha256 in malicious_hashes or md5 in malicious_hashes:
+            print(f"[WARNING] Malicious file found: {file_path}")
