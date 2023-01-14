@@ -1,0 +1,31 @@
+import os
+import subprocess
+
+def disable_interfaces():
+    if os.name == "nt":
+        # Windows
+        # Get the list of network interfaces
+        result = subprocess.run(["netsh", "interface", "show", "interface"], capture_output=True)
+        interfaces = result.stdout.decode().strip().split("\n")
+
+        # Iterate through the list of interfaces
+        for interface in interfaces:
+            # Extract the interface name
+            interface_name = interface.split(":")[0].strip()
+
+            # Disable the interface
+            subprocess.run(["netsh", "interface", "set", "interface", "name="+interface_name, "admin=disable"])
+
+        print("All network interfaces have been disabled on Windows.")
+    elif os.name == "posix":
+        # Linux or macOS
+        # Iterate through the list of interfaces
+        for interface in os.listdir("/sys/class/net"):
+            # Disable the interface
+            subprocess.run(["ifconfig", interface, "down"])
+
+        print("All network interfaces have been disabled on Linux/macOS.")
+    else:
+        print("This script does not support the current operating system.")
+
+disable_interfaces()
