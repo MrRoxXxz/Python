@@ -1,34 +1,46 @@
 import os
-import subprocess
+import platform
 
-def disable_interfaces(action):
-    if os.name == "nt":
-        # Windows
-        # Get the list of network interfaces
-        result = subprocess.run(["netsh", "interface", "show", "interface"], capture_output=True)
-        interfaces = result.stdout.decode().strip().split("\n")
-
-        # Iterate through the list of interfaces
-        for interface in interfaces:
-            # Extract the interface name
-            interface_name = interface.split(":")[0].strip()
-
-            # Disable or enable the interface
-            subprocess.run(["netsh", "interface", "set", "interface", "name="+interface_name, f"admin={action}"])
-        if action == 'disable':
-            print("All network interfaces have been disabled on Windows.")
-        else:
-            print("All network interfaces have been enabled on Windows.")
-    elif os.name == "posix":
-        # Linux or macOS
-        # Iterate through the list of interfaces
-        for interface in os.listdir
-
-            # Disable the interface
-            subprocess.run(["ifconfig", interface, "down"])
-
-        print("All network interfaces have been disabled on Linux/macOS.")
+def enable_interface(interface):
+    if platform.system() == "Windows":
+        os.system("netsh interface set interface " + interface + " admin=enable")
+    elif platform.system() == "Darwin":
+        os.system("ifconfig " + interface + " up")
+    elif platform.system() == "Linux":
+        os.system("ip link set " + interface + " up")
     else:
-        print("This script does not support the current operating system.")
+        print("Unsupported operating system.")
 
-disable_interfaces()
+def disable_interface(interface):
+    if platform.system() == "Windows":
+        os.system("netsh interface set interface " + interface + " admin=disable")
+    elif platform.system() == "Darwin":
+        os.system("ifconfig " + interface + " down")
+    elif platform.system() == "Linux":
+        os.system("ip link set " + interface + " down")
+    else:
+        print("Unsupported operating system.")
+
+def get_interfaces():
+    if platform.system() == "Windows":
+        os.system("netsh interface show interface")
+    elif platform.system() == "Darwin":
+        os.system("ifconfig -a")
+    elif platform.system() == "Linux":
+        os.system("ip link show")
+    else:
+        print("Unsupported operating system.")
+
+# Print available interfaces
+get_interfaces()
+
+# Ask user for input
+interface = input("Enter the name of the interface you want to enable/disable: ")
+enable = input("Do you want to enable or disable the interface? ")
+
+if enable.lower() == "enable":
+    enable_interface(interface)
+elif enable.lower() == "disable":
+    disable_interface(interface)
+else:
+    print("Invalid input.")
