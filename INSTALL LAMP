@@ -1,32 +1,47 @@
-import subprocess
+import os
+import platform
 
-def check_install_lamp():
-    # Check if Apache is installed
-    apache_installed = subprocess.run(["which", "httpd"], capture_output=True)
-    if apache_installed.returncode != 0:
-        print("Apache not found, installing...")
-        subprocess.run(["sudo", "apt-get", "install", "-y", "apache2"])
-    else:
-        print("Apache already installed.")
+# check the distribution type
+distro = platform.linux_distribution()[0].lower()
 
-    # Check if MySQL is installed
-    mysql_installed = subprocess.run(["which", "mysql"], capture_output=True)
-    if mysql_installed.returncode != 0:
-        print("MySQL not found, installing...")
-        subprocess.run(["sudo", "apt-get", "install", "-y", "mysql-server"])
-    else:
-        print("MySQL already installed.")
+# check if LAMP is installed
+if distro in ["centos", "red hat"]:
+    if os.system("rpm -q httpd") != 0:
+        os.system("sudo yum install httpd")
+    if os.system("rpm -q mariadb-server") != 0:
+        os.system("sudo yum install mariadb-server")
+    if os.system("rpm -q php") != 0:
+        os.system("sudo yum install php")
+elif distro in ["ubuntu", "debian"]:
+    if os.system("dpkg -s apache2") != 0:
+        os.system("sudo apt-get install apache2")
+    if os.system("dpkg -s mysql-server") != 0:
+        os.system("sudo apt-get install mysql-server")
+    if os.system("dpkg -s php") != 0:
+        os.system("sudo apt-get install php")
+else:
+    print("The script does not support this distribution.")
+    exit()
 
-    # Check if PHP is installed
-    php_installed = subprocess.run(["which", "php"], capture_output=True)
-    if php_installed.returncode != 0:
-        print("PHP not found, installing...")
-        subprocess.run(["sudo", "apt-get", "install", "-y", "php"])
-    else:
-        print("PHP already installed.")
+# check if ufw is installed
+if distro in ["ubuntu", "debian"]:
+    if os.system("dpkg -s ufw") != 0:
+        os.system("sudo apt-get install ufw")
+else:
+    print("The script does not support firewall for this distribution.")
 
-    # Start Apache and MySQL services
-    subprocess.run(["sudo", "systemctl", "start", "apache2"])
-    subprocess.run(["sudo", "systemctl", "start", "mysql"])
+# create /var/www directory
+if not os.path.exists("/var/www"):
+    os.mkdir("/var/www")
 
-check_install_lamp()
+# create index.html file
+index_file = open("/var/www/index.html", "w")
+index_file.write("<!DOCTYPE html><html><body><h1>Hello, World</h1></body></html>")
+index_file.close()
+
+# configure firewall to allow port 80 and 443
+if distro in ["ubuntu", "debian"]:
+    os.system("sudo ufw allow 80/tcp")
+    os.system("sudo ufw allow 443/tcp")
+else:
+    print("The script does not support firewall for this distribution.")
