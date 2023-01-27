@@ -1,1 +1,78 @@
+import pyshark
+import pandas as pd
+import numpy as np
+from collections import Counter
+from scapy.all import *
+import matplotlib.pyplot as plt
+from matplotlib import cm
+import networkx as nx
+
+# Function to get external IP addresses
+def get_external_ips(pcap, user_scope):
+    ip_list = []
+    for packet in pcap:
+        try:
+            ip_src = packet.ip.src
+            ip_dst = packet.ip.dst
+            if ip_src not in user_scope and ip_src not in ip_list:
+                ip_list.append(ip_src)
+            if ip_dst not in user_scope and ip_dst not in ip_list:
+                ip_list.append(ip_dst)
+        except AttributeError:
+            pass
+    return ip_list
+
+# Function to graph network protocols by count
+def graph_protocols(pcap):
+    protocols = []
+    for packet in pcap:
+        protocols.append(packet.transport_layer)
+    protocol_count = Counter(protocols)
+    protocol_count = dict(protocol_count)
+    plt.bar(range(len(protocol_count)), list(protocol_count.values()), align='center')
+    plt.xticks(range(len(protocol_count)), list(protocol_count.keys()))
+    plt.xlabel('Protocols')
+    plt.ylabel('Count')
+    plt.title('Network Protocols by Count')
+    plt.show()
+
+# Function to generate map of nodes seen in the PCAP
+def generate_map(pcap):
+    nodes = []
+    edges = []
+    for packet in pcap:
+        src = packet.ip.src
+        dst = packet.ip.dst
+        edges.append((src, dst))
+        if src not in nodes:
+            nodes.append(src)
+        if dst not in nodes:
+            nodes.append(dst)
+    G = nx.Graph()
+    G.add_nodes_from(nodes)
+    G.add_edges_from(edges)
+    pos = nx.spring_layout(G)
+    nx.draw(G, pos, with_labels=True, node_color='skyblue', edge_color='gray', node_size=1500, alpha=0.5)
+    plt.show()
+
+# Define the Main Function
+
+def main():
+    # Get PCAP file from user
+    file = input("Enter the path of the PCAP file: ")
+    # Get user-specified IP scope
+    user_scope = input("Enter the IP scope (e.g. 10.0.0.0/8): ")
+    # Read PCAP file using pyshark
+    pcap = pyshark.FileCapture(file)
+    # Get list of external IP addresses
+    external_ips = get_external_ips(pcap, user_scope)
+    print("List of external IP addresses: ", external_ips)
+    # Graph network protocols by count
+    graph_protocols(pcap)
+    # Generate map of nodes seen in the PCAP
+    generate_map(pcap)
+
+if __name__ == "__main__":
+    main()
+
 
