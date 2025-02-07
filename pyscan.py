@@ -267,7 +267,7 @@ def run_nmap_scan(ip_list_file, output_file):
     NMAP_PATH = r"C:\Program Files (x86)\Nmap\nmap.exe"  # Update with your actual Nmap installation path
     
     command = [
-        NMAP_PATH, "-T3", "-p-", "sV", "-o", "-v", "-iL", ip_list_file, "-oN", output_file
+        NMAP_PATH, "-T3", "-p-", "-sV", "-o", "-v", "-iL", ip_list_file, "-oN", output_file
     ]
     
     print(f"Running Nmap with command: {' '.join(command)}")
